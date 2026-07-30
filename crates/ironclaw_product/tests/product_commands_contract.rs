@@ -24,6 +24,22 @@ fn command_payload_maps_to_typed_model_command_without_v1_parser() {
 }
 
 #[test]
+fn model_command_accepts_optional_set_keyword() {
+    let payload =
+        InboundCommandPayload::new("model", "set gpt-5-mini", ProductTriggerReason::BotCommand)
+            .expect("valid command");
+
+    assert_eq!(
+        ProductCommand::from_payload(&payload).expect("parse model command"),
+        ProductCommand::Model {
+            action: ProductModelCommand::Set {
+                model: "gpt-5-mini".to_string(),
+            }
+        }
+    );
+}
+
+#[test]
 fn model_command_maps_provider_selection_without_cli_shelling_contract() {
     let payload = InboundCommandPayload::new(
         "model",
