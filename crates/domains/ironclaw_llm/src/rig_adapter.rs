@@ -2121,7 +2121,7 @@ mod tests {
             _request: RigRequest,
         ) -> Result<rig::completion::CompletionResponse<Self::Response>, CompletionError> {
             Err(CompletionError::ProviderError(
-                "HTTP 400 Bad Request: The input (314325 tokens) is longer than the model's context length (262144 tokens).".to_string(),
+                "The request failed: too_long (content).".to_string(),
             ))
         }
 
@@ -4556,7 +4556,10 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn complete_maps_longer_than_context_error_to_context_length_exceeded() {
+    async fn complete_maps_content_too_long_to_context_length_exceeded() {
+        // Crate tier is intentional: provider-text classification and its
+        // public RigAdapter caller are both local to ironclaw_llm. Recovery
+        // consumes the typed LlmError and has no access to provider wording.
         let adapter = RigAdapter::new(FailingCompletionModel, "nearai");
         let err = adapter
             .complete(CompletionRequest::new(vec![ChatMessage::user(
@@ -4567,8 +4570,8 @@ mod tests {
 
         match err {
             LlmError::ContextLengthExceeded { used, limit } => {
-                assert_eq!(used, 314325);
-                assert_eq!(limit, 262144);
+                assert_eq!(used, 0);
+                assert_eq!(limit, 0);
             }
             other => panic!("expected context-length error, got {other:?}"),
         }

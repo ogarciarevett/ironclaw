@@ -456,6 +456,7 @@ pub(crate) fn is_context_length_error_message(lower: &str) -> bool {
         "too many tokens",
         "payload too large",
         "longer than the model's context length",
+        "too_long (content)",
     ];
 
     parse_prompt_too_long_counts(lower).is_some()
@@ -1082,6 +1083,14 @@ mod tests {
         assert!(!is_context_length_error_message(unrelated));
         assert_eq!(parse_context_token_counts(unrelated), (0, 0));
         assert!(context_length_error(400, unrelated).is_none());
+    }
+
+    #[test]
+    fn content_too_long_maps_to_context_length_exceeded() {
+        assert!(matches!(
+            context_length_error(400, "The request failed: too_long (content)."),
+            Some(LlmError::ContextLengthExceeded { used: 0, limit: 0 })
+        ));
     }
 
     // ------------------------------------------------------------------
