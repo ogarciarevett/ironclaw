@@ -410,6 +410,31 @@ async fn a_vendor_failure_terminalizes_with_the_mapped_code() {
     );
 }
 
+#[tokio::test]
+async fn a_deployment_configuration_failure_is_terminal_and_backend_owned() {
+    let fixture = Fixture::new();
+    let flow = fixture.start().await;
+    fixture
+        .vendor
+        .fail_next_call(DeviceLinkErrorCode::NotConfigured, false);
+
+    let failed = fixture
+        .driver
+        .poll(&fixture.scope, flow.id)
+        .await
+        .expect("a configuration failure becomes a terminal record");
+
+    assert_eq!(failed.status, AuthFlowStatus::Failed);
+    assert_eq!(failed.error, Some(AuthErrorCode::BackendUnavailable));
+    assert!(matches!(
+        frame(&failed),
+        DeviceLinkStep::Failed {
+            code: DeviceLinkErrorCode::NotConfigured,
+            restartable: false,
+        }
+    ));
+}
+
 /// A vendor whose manifest declares some other auth method must not be driven
 /// through this path at all.
 #[tokio::test]

@@ -1675,5 +1675,6 @@ registerPack("ar", {
   "deviceLink.error.identity_conflict": "هذا الحساب مرتبط بالفعل. ألغِ ربطه من حساب IronClaw المتصل به، ثم حاول مرة أخرى.",
   "deviceLink.error.vendor_unavailable": "الخدمة غير متاحة مؤقتًا.",
   "deviceLink.error.custody_failed": "تعذّر حفظ الربط بأمان.",
+  "deviceLink.error.not_configured": "لم يتم إعداد ربط الحسابات لهذا النشر. تواصل مع المسؤول.",
   "deviceLink.error.internal": "حدث خطأ ما أثناء الربط."
 });

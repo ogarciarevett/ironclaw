@@ -813,6 +813,7 @@ fn auth_error_for(code: DeviceLinkErrorCode) -> AuthErrorCode {
         | DeviceLinkErrorCode::LimitReached
         | DeviceLinkErrorCode::VendorUnavailable
         | DeviceLinkErrorCode::CustodyFailed
+        | DeviceLinkErrorCode::NotConfigured
         | DeviceLinkErrorCode::Internal => AuthErrorCode::BackendUnavailable,
     }
 }

@@ -866,6 +866,22 @@ test("DeviceLinkPanel offers 'start again' on a restartable failure and refuses 
   assert.ok(!stringify(terminalView).includes("deviceLink.startAgain"));
   assert.ok(stringify(terminalView).includes("deviceLink.cannotRetry"));
 
+  const unconfigured = createHarness({
+    startResponses: [
+      response(
+        wireFrame({
+          step: DEVICE_LINK_STEPS.failed,
+          instructions: "This deployment cannot start account linking.",
+          error_code: "not_configured",
+          restartable: false,
+        }),
+      ),
+    ],
+  });
+  const unconfiguredView = await unconfigured.mount();
+  assert.ok(stringify(unconfiguredView).includes("deviceLink.error.not_configured"));
+  assert.ok(!stringify(unconfiguredView).includes("deviceLink.startAgain"));
+
   const conflicted = createHarness({
     startResponses: [
       response(

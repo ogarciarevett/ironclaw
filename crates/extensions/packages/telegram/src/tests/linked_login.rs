@@ -232,6 +232,74 @@ fn a_completed_but_unfinalized_login_is_still_logged_out_when_abandoned() {
     );
 }
 
+#[derive(Clone, Copy)]
+struct EmptySession;
+
+#[async_trait::async_trait]
+impl ironclaw_extension_contracts::linked_session::LinkedSessionPort for EmptySession {
+    async fn load(
+        &self,
+    ) -> Result<
+        Option<ironclaw_extension_contracts::linked_session::LinkedSessionSnapshot>,
+        ironclaw_extension_contracts::linked_session::LinkedSessionError,
+    > {
+        Ok(None)
+    }
+
+    async fn save(
+        &self,
+        _expected: ironclaw_extension_contracts::linked_session::LinkedSessionVersion,
+        _blob: ironclaw_extension_contracts::linked_session::SessionBytes,
+    ) -> Result<
+        ironclaw_extension_contracts::linked_session::LinkedSessionVersion,
+        ironclaw_extension_contracts::linked_session::LinkedSessionError,
+    > {
+        unreachable!("a missing deployment identity must fail before custody")
+    }
+}
+
+impl ironclaw_extension_contracts::linked_session::LinkedSessionPortFactory for EmptySession {
+    fn open(
+        &self,
+        _grant: &ironclaw_extension_contracts::linked_session::LinkedAccountGrant,
+    ) -> Arc<dyn ironclaw_extension_contracts::linked_session::LinkedSessionPort> {
+        unreachable!("a missing deployment identity must fail before custody")
+    }
+}
+
+#[tokio::test]
+async fn login_without_an_application_identity_reports_not_configured() {
+    let pool = SessionPool::new(Arc::new(EmptySession), None);
+    let adapter = TelegramDeviceLinkAdapter::new(None, &pool);
+    let flow_id = DeviceLinkFlowId::new("flow-not-configured").expect("flow id");
+    let extension_id = ironclaw_host_api::ids::ExtensionId::new("telegram").expect("extension id");
+    let user_id = ironclaw_host_api::ids::UserId::new("user-1").expect("user id");
+    let config = std::collections::BTreeMap::new();
+    let session = EmptySession;
+    let ctx = DeviceLinkContext {
+        flow_id: &flow_id,
+        extension_id: &extension_id,
+        user_id: &user_id,
+        config: &config,
+        session: &session,
+        account: None,
+    };
+
+    let error = adapter
+        .begin(&ctx, DeviceLinkMode::Default)
+        .await
+        .expect_err("an unconfigured deployment cannot start a Telegram login");
+
+    assert_eq!(
+        serde_json::to_string(&error.code()).expect("error code serializes"),
+        "\"not_configured\""
+    );
+    assert!(
+        !error.restartable(),
+        "restarting cannot add deployment config"
+    );
+}
+
 // ---------------------------------------------------------------------------
 // Attempt bounds
 // ---------------------------------------------------------------------------

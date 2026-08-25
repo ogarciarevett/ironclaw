@@ -135,6 +135,9 @@ pub enum DeviceLinkErrorCode {
     VendorUnavailable,
     /// Host-side custody failed (see [`LinkedSessionError`]).
     CustodyFailed,
+    /// The deployment is missing configuration required to start this flow.
+    /// Terminal until an administrator supplies it.
+    NotConfigured,
     /// Anything else. Reserved for genuinely unclassifiable failures.
     Internal,
 }
@@ -529,6 +532,9 @@ pub enum DeviceLinkError {
     /// Custody failed; the link cannot be made durable.
     #[error("device-link custody failed")]
     Custody(#[from] LinkedSessionError),
+    /// Required deployment configuration is absent.
+    #[error("device-link is not configured: {reason}")]
+    NotConfigured { reason: &'static str },
     /// The adapter failed for a reason the run cannot recover from.
     #[error("device-link adapter failed: {reason}")]
     Internal { reason: &'static str },
@@ -545,6 +551,7 @@ impl DeviceLinkError {
             Self::UnsupportedMode { .. } | Self::Internal { .. } => DeviceLinkErrorCode::Internal,
             Self::Vendor { code, .. } => *code,
             Self::Custody(_) => DeviceLinkErrorCode::CustodyFailed,
+            Self::NotConfigured { .. } => DeviceLinkErrorCode::NotConfigured,
         }
     }
 
@@ -552,9 +559,10 @@ impl DeviceLinkError {
     pub fn restartable(&self) -> bool {
         match self {
             Self::UnknownFlow | Self::InvalidInput { .. } => true,
-            Self::InvalidStep { .. } | Self::UnsupportedMode { .. } | Self::Internal { .. } => {
-                false
-            }
+            Self::InvalidStep { .. }
+            | Self::UnsupportedMode { .. }
+            | Self::NotConfigured { .. }
+            | Self::Internal { .. } => false,
             Self::Vendor { restartable, .. } => *restartable,
             Self::Custody(_) => false,
         }

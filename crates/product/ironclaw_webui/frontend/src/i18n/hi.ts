@@ -1675,5 +1675,6 @@ registerPack("hi", {
   "deviceLink.error.identity_conflict": "यह खाता पहले से लिंक है। जिस IronClaw खाते से यह जुड़ा है, वहाँ से इसे अनलिंक करें और फिर कोशिश करें।",
   "deviceLink.error.vendor_unavailable": "सेवा फ़िलहाल उपलब्ध नहीं है।",
   "deviceLink.error.custody_failed": "लिंक सुरक्षित रूप से सहेजा नहीं जा सका।",
+  "deviceLink.error.not_configured": "इस डिप्लॉयमेंट के लिए खाता लिंक करना कॉन्फ़िगर नहीं है। किसी व्यवस्थापक से संपर्क करें।",
   "deviceLink.error.internal": "लिंक करते समय कुछ गड़बड़ हो गई।"
 });

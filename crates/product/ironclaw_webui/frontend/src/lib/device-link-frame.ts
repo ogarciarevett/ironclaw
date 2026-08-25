@@ -68,6 +68,7 @@ export const DEVICE_LINK_ERROR_CODES = Object.freeze([
   "identity_conflict",
   "vendor_unavailable",
   "custody_failed",
+  "not_configured",
   "internal",
 ]);
 
@@ -79,6 +80,7 @@ const NON_RESTARTABLE_ERROR_CODES = Object.freeze([
   "account_unavailable",
   "identity_conflict",
   "custody_failed",
+  "not_configured",
 ]);
 
 export function deviceLinkStepIsTerminal(step) {

@@ -185,6 +185,7 @@ test("restartability falls back to the driver's own rule when the frame omits it
   // Mirrors `DeviceLinkDriverError::restartable`: an ineligible account and a
   // custody failure cannot be fixed by starting over.
   assert.equal(failedWith("account_unavailable"), false);
+  assert.equal(failedWith("not_configured"), false);
   assert.equal(failedWith("custody_failed"), false);
   assert.equal(failedWith("expired"), true);
   assert.equal(failedWith("unknown_flow"), true);
